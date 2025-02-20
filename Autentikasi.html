@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyek Ticket-Chain - Dokumentasi Autentikasi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, monospace;
+            color: #d63384;
+        }
+        .note {
+            background-color: #fffae6;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proyek Ticket-Chain - Dokumentasi Autentikasi</h1>
+
+    <!-- Tambahkan script Pi SDK -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        // Inisialisasi Pi SDK
+        Pi.init({ version: "2.0" });
+
+        // Contoh autentikasi pengguna
+        const scopes = ['payments'];
+
+        function onIncompletePaymentFound(payment) {
+            console.log("Pembayaran belum selesai ditemukan:", payment);
+        }
+
+        async function authenticateUser() {
+            try {
+                const authRes = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                console.log("Autentikasi berhasil! Data pengguna:", authRes);
+
+                // Verifikasi token dengan API endpoint /me
+                const accessToken = authRes.accessToken;
+                const meResponse = await fetch('https://api.minepi.com/v2/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (meResponse.ok) {
+                    const userData = await meResponse.json();
+                    console.log("Data pengguna diverifikasi:", userData);
+                } else {
+                    console.error("Token tidak valid. Kode status:", meResponse.status);
+                }
+            } catch (error) {
+                console.error("Gagal autentikasi:", error);
+            }
+        }
+
+        // Panggil fungsi autentikasi saat halaman dimuat
+        authenticateUser();
+    </script>
+
+    <!-- Konten Dokumentasi Autentikasi -->
+    <h2>Panduan Autentikasi Pengguna</h2>
+    <p>Berikut adalah langkah-langkah untuk mengautentikasi pengguna di aplikasi Anda:</p>
+
+    <h3>Langkah 1: Panggil Metode `authenticate()` dari Pi SDK</h3>
+    <p>Menggunakan metode `Pi.authenticate()`, Anda dapat memperoleh informasi pengguna beserta token akses.</p>
+    <pre><code>
+const authRes = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
+    </code></pre>
+
+    <h3>Langkah 2: Kirim Permintaan GET ke Endpoint `/me` Pi API</h3>
+    <p>Untuk memverifikasi data yang diperoleh dari langkah pertama, Anda perlu mengirim permintaan GET ke endpoint `/me` Pi API, dengan menyertakan token akses di header. Jika token valid, API akan mengembalikan respons berisi objek [UserDTO](./platform_API.md#UserDTO). Jika token tidak valid, API akan mengembalikan kode HTTP 401 Unauthorized.</p>
+    <pre><code>
+const me = await axios.get('https://api.minepi.com/v2/me', {
+  headers: { 'Authorization': `Bearer ${accessToken}` }
+});
+    </code></pre>
+
+    <div class="note">
