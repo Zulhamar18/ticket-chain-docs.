@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyek Ticket-Chain - Dokumentasi Ads</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, monospace;
+            color: #d63384;
+        }
+        .note {
+            background-color: #fffae6;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proyek Ticket-Chain - Dokumentasi Ads</h1>
+
+    <!-- Tambahkan script Pi SDK -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        // Inisialisasi Pi SDK
+        Pi.init({ version: "2.0" });
+
+        // Contoh autentikasi pengguna
+        const scopes = ['payments'];
+
+        function onIncompletePaymentFound(payment) {
+            console.log("Pembayaran belum selesai ditemukan:", payment);
+        }
+
+        Pi.authenticate(scopes, onIncompletePaymentFound)
+            .then(function(auth) {
+                console.log("Autentikasi berhasil! Siap untuk menampilkan iklan.");
+            })
+            .catch(function(error) {
+                console.error("Gagal autentikasi:", error);
+            });
+    </script>
+
+    <!-- Konten Dokumentasi Ads -->
+    <h2>Pendahuluan tentang Iklan (Ads)</h2>
+    <p>Pi App Platform memberikan kesempatan kepada pengembang untuk mengintegrasikan iklan ke dalam aplikasi mereka dan mendapatkan imbalan. Menampilkan iklan terbuka untuk semua aplikasi di ekosistem Pi, tetapi hanya aplikasi yang disetujui oleh Tim Inti Pi yang dapat dimonetisasi.</p>
+
+    <h3>Jenis Iklan</h3>
+    <ul>
+        <li><strong>Interstitial Ads</strong>: Iklan layar penuh yang ditampilkan di antara konten, biasanya pada titik transisi alami seperti di antara level permainan.</li>
+        <li><strong>Rewarded Ads</strong>: Iklan layar penuh yang ditampilkan kepada pengguna sebagai imbalan dalam aplikasi. Misalnya, jika pemain kehabisan nyawa dalam game, Anda dapat memberikan opsi untuk menonton iklan untuk mendapatkan nyawa tambahan.</li>
+    </ul>
+
+    <h2>Prasyarat</h2>
+    <p>Untuk mendapatkan imbalan dari Pi Developer Ad Network, Anda harus mengajukan permohonan di Pi Developer Portal. Aplikasi Anda akan ditinjau oleh Tim Inti Pi.</p>
+
+    <div class="note">
+        <strong>Catatan:</strong> Beberapa metode modul Ads mungkin mengembalikan respons yang berbeda tergantung pada apakah aplikasi Anda telah disetujui untuk Pi Developer Ad Network.
+    </div>
+
+    <h2>Implementasi</h2>
+
+    <h3>Penggunaan Dasar</h3>
+    <p>Pi Browser secara internal mengelola strategi ketersediaan iklan, memuat iklan awal dan memuat ulang setelah ditampilkan. Ini bertujuan untuk memastikan bahwa iklan selalu siap untuk ditampilkan.</p>
+
+    <h4>Contoh Interstitial Ads</h4>
+    <pre><code>
+// Contoh: Menampilkan iklan interstitial setiap 3 level
+completeLevel();
+if (currentLevel % 3 === 0) {
+  await Pi.Ads.showAd("interstitial");
+}
+startNewLevel();
+    </code></pre>
+
+    <h4>Contoh Rewarded Ads</h4>
+    <pre><code>
+const showAdResponse = await Pi.Ads.showAd("rewarded");
+if (showAdResponse.result === "AD_REWARDED") {
+  // Verifikasi status iklan dengan Pi Platform API
+  const result = await rewardUserForWatchingRewardedAd(showAdResponse.adId);
+  if (result.rewarded === true) {
+    grantUserAdditionalLive();
+  }
+}
+    </code></pre>
+
+    <h3>Penggunaan Lanjutan</h3>
+    <p>Anda dapat menggunakan metode tambahan seperti `Pi.Ads.isAdReady()` dan `Pi.Ads.requestAd()` untuk memastikan ketersediaan iklan dan menangani kasus-kasus tidak terduga.</p>
+
+    <h4>Contoh Interstitial Ads Lanjutan</h4>
+    <pre><code>
+if (currentLevel % 3 === 0) {
+  const isAdReadyResponse = await Pi.Ads.isAdReady("interstitial");
+  if (isAdReadyResponse.ready === true) {
+    return Pi.Ads.showAd("interstitial");
+  }
+  const requestAdResponse = await Pi.Ads.requestAd("interstitial");
+  if (requestAdResponse.result !== "AD_LOADED") {
+    // Informasikan kepada pengguna bahwa iklan tidak dapat dimuat
+    return;
+  }
+  const showAdResponse = await Pi.Ads.showAd("interstitial");
+  if (showAdResponse.result !== "AD_CLOSED") {
+    // Informasikan kepada pengguna bahwa iklan tidak dapat ditampilkan
+    return;
+  }
+}
+startNextLevel();
+    </code></pre>
+
+    <h4>Verifikasi Status Rewarded Ads</h4>
+    <p>Sebelum memberikan hadiah kepada pengguna, Anda harus memverifikasi status iklan menggunakan Pi Platform API.</p>
+    <pre><code>
+const showRewardedAd = async () => {
+  try {
+    const isAdReadyResponse = await Pi.Ads.isAdReady("rewarded");
+    if (isAdReadyResponse.ready === false) {
+      const requestAdResponse = await Pi.Ads.requestAd("rewarded");
+      if (requestAdResponse.result === "ADS_NOT_SUPPORTED") {
+        return showAdsNotSupportedModal();
+      }
+      if (requestAdResponse.result !== "AD_LOADED") {
+        return showAdUnavailableModal();
+      }
+    }
+    const showAdResponse = await Pi.Ads.showAd("rewarded");
+    if (showAdResponse.result === "AD_REWARDED") {
+      const result = await rewardUserForWatchingRewardedAd(adId);
+      if (result.rewarded === true) {
+        showRewardedModal(result.reward);
+      } else {
+        showRewardFailModal(result.error);
+      }
+    } else {
+      showAdErrorModal();
+    }
+  } catch (err) {
+    console.error("Terjadi kesalahan:", err);
+  }
+};
+    </code></pre>
+
+    <footer>
+        <p>Dokumentasi ini disusun untuk Proyek Ticket-Chain oleh Zulham Ardiansyah.</p>
+    </footer>
+</body>
+</html>
