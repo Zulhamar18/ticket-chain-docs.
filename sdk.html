@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyek Ticket-Chain - Dokumentasi SDK</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, monospace;
+            color: #d63384;
+        }
+        .note {
+            background-color: #fffae6;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proyek Ticket-Chain - Dokumentasi SDK</h1>
+
+    <!-- Tambahkan script Pi SDK -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        // Inisialisasi Pi SDK
+        Pi.init({ version: "2.0" });
+
+        // Contoh autentikasi pengguna
+        const scopes = ['payments'];
+
+        function onIncompletePaymentFound(payment) {
+            console.log("Pembayaran belum selesai ditemukan:", payment);
+        }
+
+        Pi.authenticate(scopes, onIncompletePaymentFound)
+            .then(function(auth) {
+                console.log("Autentikasi berhasil! Siap untuk melakukan pembayaran.");
+            })
+            .catch(function(error) {
+                console.error("Gagal autentikasi:", error);
+            });
+    </script>
+
+    <!-- Konten Dokumentasi -->
+    <h2>Referensi Client SDK</h2>
+
+    <h3>Inisialisasi</h3>
+    <p>Tambahkan tag <code>script</code> berikut ke semua halaman tempat Anda perlu memanggil Pi Apps SDK:</p>
+    <pre><code><script src="https://sdk.minepi.com/pi-sdk.js"></script></code></pre>
+
+    <p>Objek konfigurasi yang dilewatkan ke fungsi <code>init</code> menerima kunci berikut:</p>
+    <ul>
+        <li><code>version</code> (string, wajib): Memastikan kompatibilitas aplikasi dengan versi SDK yang lebih baru.</li>
+        <li><code>sandbox</code> (boolean, opsional): Mengonfigurasi SDK untuk berjalan dalam mode sandbox.</li>
+    </ul>
+
+    <h3>Autentikasi</h3>
+    <p>Gunakan metode berikut untuk mengautentikasi pengguna:</p>
+    <pre><code>Pi.authenticate(scopes: Array, onIncompletePaymentFound: Function): Promise</code></pre>
+
+    <p>Hasil yang dikembalikan:</p>
+    <pre><code>type AuthResult = {
+  accessToken: string;
+  user: {
+    uid: string;
+    username: string;
+  };
+};</code></pre>
+
+    <h3>Pembayaran</h3>
+    <p>Buat pembayaran baru menggunakan metode berikut:</p>
+    <pre><code>Pi.createPayment(paymentData: PaymentData, callbacks: PaymentCallbacks): void;</code></pre>
+
+    <h3>Iklan (Ads)</h3>
+    <p>SDK menyediakan modul <code>Ads</code> untuk menampilkan iklan kepada pengguna. Contoh:</p>
+    <pre><code>Pi.Ads.showAd(adType: "interstitial" | "rewarded"): Promise;</code></pre>
+
+    <div class="note">
+        <strong>Catatan:</strong> Pastikan untuk memeriksa ketersediaan iklan menggunakan <code>Pi.Ads.isAdReady()</code> sebelum menampilkannya.
+    </div>
+
+    <h3>Fitur Lainnya</h3>
+    <p>Anda juga dapat membuka dialog berbagi menggunakan:</p>
+    <pre><code>Pi.openShareDialog(title: string, message: string): void;</code></pre>
+
+    <footer>
+        <p>Dokumentasi ini disusun untuk Proyek Ticket-Chain oleh Zulham Ardiansyah.</p>
+    </footer>
+</body>
+</html>
