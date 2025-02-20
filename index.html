@@ -3,37 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket Chain - Flight Tickets with Crypto</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <title>Proyek Ticket-Chain</title>
 </head>
 <body>
-    <header>
-        <h1>Ticket Chain</h1>
-        <p>A blockchain-based flight ticketing solution</p>
-    </header>
-    <section id="about">
-        <h2>About Ticket Chain</h2>
-        <p>An innovative platform that enables purchasing flight tickets with cryptocurrency.</p>
-    </section>
-    <section id="roadmap">
-        <h2>Roadmap</h2>
-        <ul>
-            <li>Q1 2025 - MVP Launch</li>
-            <li>Q2 2025 - Partnerships with Airlines</li>
-            <li>Q3 2025 - Global Expansion</li>
-        </ul>
-    </section>
-    <section id="features">
-        <h2>Key Features</h2>
-        <ul>
-            <li>Payments with various cryptocurrencies</li>
-            <li>Secure transactions via smart contracts</li>
-            <li>Blockchain-based ticket verification and validation</li>
-        </ul>
-    </section>
+    <h1>Selamat Datang di Ticket-Chain</h1>
+
+    <!-- Tambahkan script Pi SDK di sini -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        // Inisialisasi Pi SDK
+        Pi.init({ version: "2.0" });
+
+        // Contoh autentikasi pengguna
+        const scopes = ['payments'];
+
+        function onIncompletePaymentFound(payment) {
+            console.log("Pembayaran belum selesai ditemukan:", payment);
+        }
+
+        Pi.authenticate(scopes, onIncompletePaymentFound)
+            .then(function(auth) {
+                console.log("Autentikasi berhasil! Siap untuk melakukan pembayaran.");
+            })
+            .catch(function(error) {
+                console.error("Gagal autentikasi:", error);
+            });
+    </script>
 </body>
 </html>
-<ul class="legal-docs">
-    <li><a href="privacy-policy.md">Privacy Policy</a></li>
-    <li><a href="terms-of-service.md">Terms of Service</a></li>
-</ul>
