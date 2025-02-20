@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyek Ticket-Chain - Panduan Pembayaran Lanjutan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, monospace;
+            color: #d63384;
+        }
+        .note {
+            background-color: #fffae6;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proyek Ticket-Chain - Panduan Pembayaran Lanjutan</h1>
+
+    <!-- Tambahkan script Pi SDK -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        // Inisialisasi Pi SDK
+        Pi.init({ version: "2.0" });
+
+        // Contoh autentikasi pengguna
+        const scopes = ['payments'];
+
+        function onIncompletePaymentFound(payment) {
+            console.log("Pembayaran belum selesai ditemukan:", payment);
+        }
+
+        Pi.authenticate(scopes, onIncompletePaymentFound)
+            .then(function(auth) {
+                console.log("Autentikasi berhasil! Siap untuk memproses pembayaran lanjutan.");
+            })
+            .catch(function(error) {
+                console.error("Gagal autentikasi:", error);
+            });
+    </script>
+
+    <!-- Konten Dokumentasi Pembayaran Lanjutan -->
+    <h2>Pendahuluan tentang Pembayaran A2U (App-to-User)</h2>
+    <p>Sementara Pi Frontend Javascript SDK mendukung pembuatan pembayaran U2A (User-to-App), aplikasi Anda mungkin memerlukan kemampuan untuk membuat pembayaran A2U (App-to-User). Fitur ini saat ini hanya tersedia di Testnet.</p>
+
+    <h2>Pi Backend SDKs</h2>
+    <p>Berikut adalah daftar Pi Backend SDKs untuk berbagai bahasa pemrograman yang dapat digunakan untuk alur pembayaran A2U:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Bahasa</th>
+                <th>Tautan</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Ruby</td>
+                <td><a href="https://github.com/pi-apps/pi-ruby" target="_blank">pi-ruby</a></td>
+                <td>Didukung resmi oleh Pi Core Team</td>
+            </tr>
+            <tr>
+                <td>Node.js</td>
+                <td><a href="https://github.com/pi-apps/pi-nodejs" target="_blank">pi-nodejs</a></td>
+                <td><strong>Segera Hadir!</strong> Didukung resmi oleh Pi Core Team</td>
+            </tr>
+            <tr>
+                <td>Python</td>
+                <td>TBD</td>
+                <td>Dikelola oleh komunitas</td>
+            </tr>
+            <tr>
+                <td>PHP</td>
+                <td>TBD</td>
+                <td>Dikelola oleh komunitas</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="note">
+        <strong>Catatan:</strong> Pemelihara komunitas untuk bahasa pemrograman lain sangat diterima. Silakan ajukan PR di <a href="https://github.com/pi-apps/PiOS" target="_blank">PiOS repository</a> jika Anda tertarik untuk memelihara Pi SDK.
+    </div>
+
+    <h2>Fitur yang Didukung</h2>
+    <p>Berikut adalah daftar fitur yang didukung oleh setiap Backend SDK untuk mengintegrasikan Pi ke dalam aplikasi:</p>
+
+    <h3>Pembayaran App-to-User</h3>
+    <p>Desain saat ini untuk pembayaran A2U melibatkan interaksi dengan Pi Blockchain dan Pi Backend. Pi Blockchain adalah satu-satunya sumber kebenaran untuk pertukaran Pi. Pi Backend digunakan untuk meningkatkan pengalaman pengguna, seperti memberikan memo yang dapat dimengerti pada dompet mereka, dan tautan balik ke aplikasi Anda.</p>
+
+    <h4>Manfaat Utama:</h4>
+    <ul>
+        <li><strong>Privasi Pengguna yang Lebih Baik:</strong> API ini memungkinkan akses aman ke alamat dompet pengguna selama mereka telah menyetujui untuk berbagi dengan aplikasi Anda.</li>
+        <li><strong>Akurasi Dompet Pengguna:</strong> API mengembalikan dompet pengguna saat ini jika perubahan dompet diperlukan, untuk menghindari aplikasi mengirim Pi ke alamat dompet yang sudah tidak digunakan.</li>
+        <li><strong>Pengalaman yang Lebih Baik untuk Pengguna dan Pengembang Aplikasi:</strong> Menginformasikan pembayaran ke Pi Backend sebelum dan sesudah transaksi membantu menghindari pembayaran ganda atau bug lainnya.</li>
+        <li><strong>Integrasi yang Lebih Baik dengan Ekosistem Pi:</strong> Menggunakan API A2U memungkinkan pembayaran ditampilkan di dompet pengguna sebagai berasal dari aplikasi Anda, bukan sebagai transaksi acak dari alamat tidak dikenal.</li>
+    </ul>
+
+    <footer>
+        <p>Dokumentasi ini disusun untuk Proyek Ticket-Chain oleh Zulham Ardiansyah.</p>
+    </footer>
+</body>
+</html>
