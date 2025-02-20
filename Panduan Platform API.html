@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyek Ticket-Chain - Panduan Platform API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, monospace;
+            color: #d63384;
+        }
+        .note {
+            background-color: #fffae6;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proyek Ticket-Chain - Panduan Platform API</h1>
+
+    <!-- Tambahkan script Pi SDK -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        // Inisialisasi Pi SDK
+        Pi.init({ version: "2.0" });
+
+        // Contoh autentikasi pengguna
+        const scopes = ['payments'];
+
+        function onIncompletePaymentFound(payment) {
+            console.log("Pembayaran belum selesai ditemukan:", payment);
+        }
+
+        Pi.authenticate(scopes, onIncompletePaymentFound)
+            .then(function(auth) {
+                console.log("Autentikasi berhasil! Siap untuk menggunakan Platform API.");
+            })
+            .catch(function(error) {
+                console.error("Gagal autentikasi:", error);
+            });
+    </script>
+
+    <!-- Konten Dokumentasi Platform API -->
+    <h2>Ikhtisar</h2>
+    <p>Platform API memungkinkan Anda membaca dan menulis data ke Pi Servers yang terkait dengan aplikasi Anda di Pi App Platform dan pengguna aplikasi Anda.</p>
+
+    <h3>Base Path</h3>
+    <p>Versi terbaru dari Platform API tersedia di:</p>
+    <pre><code>api.minepi.com/v2</code></pre>
+
+    <div class="note">
+        <strong>Catatan tentang Versi API:</strong>
+        <p>Platform API saat ini berada di versi v2. Kami akan berusaha untuk tidak membuat perubahan besar pada versi API yang ada, namun perubahan besar mungkin dilakukan jika diperlukan (misalnya untuk keamanan atau privasi).</p>
+    </div>
+
+    <h3>Otorisasi</h3>
+    <p>Platform API mendukung dua mekanisme otorisasi:</p>
+    <ul>
+        <li><strong>Access Token Authorization</strong>: Digunakan untuk mengakses sumber daya terkait pengguna (misalnya `/me`).</li>
+        <li><strong>Server API Key Authorization</strong>: Digunakan untuk operasi sensitif yang harus dilakukan dari backend/server Anda.</li>
+    </ul>
+
+    <h2>Referensi API</h2>
+
+    <h3>Autentikasi</h3>
+    <p>Mengakses informasi pengguna:</p>
+    <pre><code>
+GET /me
+Authorization: Bearer <user access token>
+    </code></pre>
+    <p>Gunakan endpoint ini untuk memverifikasi validitas token akses dan identitas pengguna.</p>
+
+    <h3>Pembayaran</h3>
+    <p>Ada dua jenis pembayaran:</p>
+    <ol>
+        <li><strong>U2A (User-To-App)</strong>: Gunakan metode `createPayment` dari Pi SDK.</li>
+        <li><strong>A2U (App-To-User)</strong>: Gunakan endpoint `/payments` dengan Server API Key.</li>
+    </ol>
+
+    <h4>Membuat Pembayaran (A2U)</h4>
+    <pre><code>
+POST /payments
+Authorization: Key <your Server API Key>
+Request Body:
+{
+  "payment": {
+    "amount": 1,
+    "memo": "From app to user test",
+    "metadata": {"test": "test metadata"},
+    "uid": "a1111111-aaaa-bbbb-2222-ccccccc3333d"
+  }
+}
+    </code></pre>
+
+    <h4>Mendapatkan Informasi Pembayaran</h4>
+    <pre><code>
+GET /payments/{payment_id}
+Authorization: Key <your Server API Key>
+    </code></pre>
+
+    <h4>Menyetujui Pembayaran</h4>
+    <pre><code>
+POST /payments/{payment_id}/approve
+Authorization: Key <your Server API Key>
+    </code></pre>
+
+    <h4>Menyelesaikan Pembayaran</h4>
+    <pre><code>
+POST /payments/{payment_id}/complete
+Authorization: Key <your Server API Key>
+Request Body:
+{
+  "txid": "7a7ed20d3d72c365b9019baf8dc4c4e3cce4c08114d866e47ae157e3a796e9e7"
+}
+    </code></pre>
+
+    <h4>Membatalkan Pembayaran</h4>
+    <pre><code>
+POST /payments/{payment_id}/cancel
+Authorization: Key <your Server API Key>
+    </code></pre>
+
+    <h4>Mendapatkan Daftar Pembayaran Tidak Lengkap</h4>
+    <pre><code>
+GET /payments/incomplete_server_payments
+Authorization: Key <your Server API Key>
+Response Type: { "incomplete_server_payments": Array<PaymentDTO> }
+    </code></pre>
+
+    <h3>Iklan</h3>
+    <p>Memverifikasi status iklan berhadiah:</p>
+    <pre><code>
+GET /ads_network/status/:adId
+Authorization: Key <your Server API Key>
+    </code></pre>
+
+    <h2>Jenis Sumber Daya</h2>
+
+    <h3>`UserDTO`</h3>
+    <pre><code>
+{
+  uid: string, // Pengenal pengguna spesifik aplikasi
+  credentials: {
+    scopes: Array<Scope>, // Daftar ruang lingkup yang diberikan
+    valid_until: {
+      timestamp: number,
+      iso8601: string
+    }
+  },
+  username?: string, // Nama pengguna Pi. Memerlukan ruang lingkup `username`.
+}
+    </code></pre>
+
+    <h3>`PaymentDTO`</h3>
+    <pre><code>
+{
+  identifier: string, // Identifikasi pembayaran
+  user_uid: string, // ID pengguna spesifik aplikasi
+  amount: number, // Jumlah pembayaran
+  memo: string, // Pesan yang ditampilkan kepada pengguna
+  metadata: Object, // Objek untuk kebutuhan internal pengembang
+  from_address: string, // Alamat pengirim transaksi blockchain
+  to_address: string, // Alamat penerima transaksi blockchain
+  direction: Direction, // Arah pembayaran
+  created_at: string, // Waktu pembuatan pembayaran
+  network: AppNetwork, // Jaringan pembayaran
+  status: {
+    developer_approved: boolean, // Persetujuan Server-Side
+    transaction_verified: boolean, // Verifikasi transaksi blockchain
+    developer_completed: boolean, // Penyelesaian Server-Side
+    cancelled: boolean, // Dibatalkan oleh pengembang atau Pi Network
+    user_cancelled: boolean, // Dibatalkan oleh pengguna
+  },
+  transaction: null | {
+    txid: string, // ID transaksi blockchain
+    verified: boolean, // True jika transaksi sesuai dengan pembayaran
+    _link: string, // Tautan ke operasi di Blockchain API
+  },
+}
+    </code></pre>
+
+    <h3>`RewardedAdStatusDTO`</h3>
+    <pre><code>
+{
+  "identifier": string, // Token adId dari metode Pi SDK displayAd("rewarded")
+  "mediator_ack_status": "granted" | "revoked" | "failed" | null,
+  "mediator_granted_at": string | null, // ISO 8601 date string
+  "mediator_revoked_at": string | null, // ISO 8601 date string
+}
+    </code></pre>
+
+    <footer>
+        <p>Dokumentasi ini disusun untuk Proyek Ticket-Chain oleh Zulham Ardiansyah.</p>
+    </footer>
+</body>
+</html>
+``
