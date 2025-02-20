@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyek Ticket-Chain - Panduan Pembayaran</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, monospace;
+            color: #d63384;
+        }
+        .note {
+            background-color: #fffae6;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proyek Ticket-Chain - Panduan Pembayaran</h1>
+
+    <!-- Tambahkan script Pi SDK -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+        // Inisialisasi Pi SDK
+        Pi.init({ version: "2.0" });
+
+        // Contoh autentikasi pengguna
+        const scopes = ['payments'];
+
+        function onIncompletePaymentFound(payment) {
+            console.log("Pembayaran belum selesai ditemukan:", payment);
+        }
+
+        Pi.authenticate(scopes, onIncompletePaymentFound)
+            .then(function(auth) {
+                console.log("Autentikasi berhasil! Siap untuk memproses pembayaran.");
+            })
+            .catch(function(error) {
+                console.error("Gagal autentikasi:", error);
+            });
+    </script>
+
+    <!-- Konten Dokumentasi Pembayaran -->
+    <h2>Pendahuluan tentang Pembayaran</h2>
+    <p>Pembayaran adalah pembungkus transaksi blockchain yang memungkinkan aplikasi Anda, Pi Blockchain, dan Pi Servers tetap sinkron saat pengguna mengirimkan transaksi blockchain untuk membayar sesuatu di aplikasi Anda.</p>
+
+    <h2>Alur Pembayaran</h2>
+    <p>Setelah pembayaran dibuat, pembayaran melewati 3 fase utama:</p>
+    <ol>
+        <li><strong>Fase I - Pembuatan Pembayaran dan Persetujuan Server-Side</strong></li>
+        <li><strong>Fase II - Interaksi Pengguna dan Transaksi Blockchain</strong></li>
+        <li><strong>Fase III - Penyelesaian Server-Side</strong></li>
+    </ol>
+
+    <div style="text-align:center;">
+        <img src="./img/payment_flow.png" alt="Diagram Alur Pembayaran" />
+    </div>
+
+    <h3>Fase I - Pembuatan Pembayaran dan Persetujuan Server-Side</h3>
+    <ol>
+        <li><code>createPayment</code>: Frontend aplikasi Anda membuat pembayaran. UI Payment Flow terbuka, tetapi tidak dapat berinteraksi hingga pembayaran disetujui oleh server Anda.</li>
+        <li><code>onReadyForServerApproval</code>: JS SDK memperoleh ID pembayaran (PaymentID) dan mengirimkannya ke aplikasi Anda untuk persetujuan Server-Side.</li>
+        <li>Frontend aplikasi Anda mengirim PaymentID ke server aplikasi Anda. Implementasi ini menjadi tanggung jawab Anda.</li>
+        <li>Persetujuan Server-Side: Server aplikasi Anda menyetujui pembayaran dengan Pi Servers melalui API call <code>/approve</code>. Ini memungkinkan pengguna untuk mengirim transaksi blockchain.</li>
+    </ol>
+
+    <h3>Fase II - Interaksi Pengguna dan Transaksi Blockchain</h3>
+    <p>Pada tahap ini, dialog pembayaran menjadi interaktif dan memungkinkan pengguna untuk mengonfirmasi transaksi, menandatanganinya, dan mengirimkannya ke Pi Blockchain. Anda tidak perlu melakukan apa pun pada tahap ini karena semuanya ditangani oleh Pi Apps Platform dan Pi Wallet.</p>
+
+    <h3>Fase III - Penyelesaian Server-Side</h3>
+    <ol>
+        <li><code>onReadyForServerCompletion</code>: JS SDK mengirimkan ID transaksi blockchain (TxID) ke frontend aplikasi Anda. Nilai ini diperlukan untuk penyelesaian Server-Side.</li>
+        <li>Frontend aplikasi Anda mengirim TxID ke server aplikasi Anda. Implementasi ini menjadi tanggung jawab Anda.</li>
+        <li>Penyelesaian Server-Side: Server aplikasi Anda mengonfirmasi pembayaran dengan Pi Servers melalui API call <code>/complete</code>. Ini memungkinkan Anda memeriksa apakah transaksi blockchain benar-benar terjadi.</li>
+        <li>Flow pembayaran ditutup. Aplikasi Anda kini terlihat lagi oleh pengguna.</li>
+    </ol>
+
+    <div class="note">
+        <strong>Peringatan Penting:</strong>
+        <p>Pengguna mungkin menjalankan versi SDK yang diretas dan berpura-pura telah melakukan pembayaran. Jika panggilan API untuk penyelesaian Server-Side mengembalikan kode kesalahan non-200, <strong>jangan</strong> tandai pembayaran sebagai selesai di sisi Anda, dan <strong>jangan</strong> memberikan barang/jasa yang diminta pengguna.</p>
+    </div>
+
+    <h2>Alur Sederhana</h2>
+    <p>Berikut adalah diagram alur pembayaran dari sudut pandang aplikasi Anda dalam bentuk yang lebih sederhana:</p>
+    <div style="text-align:center;">
+        <img src="./img/payment_flow_simplified.png" alt="Diagram Alur Pembayaran Sederhana" />
+    </div>
+
+    <ol>
+        <li>Gunakan fungsi Pi SDK untuk memulai pembayaran.</li>
+        <li>Fungsi callback yang dipanggil secara otomatis oleh Pi SDK (memberi tahu App Server bahwa ia perlu membuat permintaan API approve).</li>
+        <li>Permintaan API dari App Server ke Pi Server untuk menyetujui pembayaran (memberi tahu Pi Server bahwa Anda menyadari pembayaran ini).</li>
+        <li>Pi Browser menampilkan halaman detail pembayaran kepada pengguna, dan kita menunggu hingga pengguna menandatangani transaksi.</li>
+        <li>Fungsi callback yang dipanggil secara otomatis oleh Pi SDK (memberi tahu App Server bahwa ia perlu membuat permintaan API complete).</li>
+        <li>Permintaan API dari App Server ke Pi Server untuk menyelesaikan pembayaran (memberi tahu Pi Server bahwa Anda telah menyelesaikan pembayaran ini).</li>
+    </ol>
+
+    <footer>
+        <p>Dokumentasi ini disusun untuk Proyek Ticket-Chain oleh Zulham Ardiansyah.</p>
+    </footer>
+</body>
+</html>
